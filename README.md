@@ -1,0 +1,2 @@
+# simpleRemoteControl
+Python练手项目，解决冬天不想起床控制电脑的解决方案
