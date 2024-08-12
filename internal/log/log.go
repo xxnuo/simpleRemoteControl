@@ -9,7 +9,7 @@ import (
 
 type Logger = zerolog.Logger
 
-func NewLogger(isJsonLog bool) Logger {
+func New(isJsonLog bool) Logger {
 	consoleWriter := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.DateTime})
 
 	if isJsonLog {

@@ -5,11 +5,12 @@ import (
 	v1 "github.com/xxnuo/simpleRemoteControl/internal/api/v1"
 )
 
-func SetupRouter(a *fiber.App) {
+func InitRouter(a *fiber.App) {
 	root := a.Group("/api/v1")
 	root.Get("/", v1.Hello)
 
-	// Auth
-	auth := root.Group("/auth")
-	auth.Post("/login", v1.Auth)
+	token := root.Group("/token")
+	token.Post("/new", v1.NewToken)
 }
+
+func UpdateRouter(a *fiber.App) {}
