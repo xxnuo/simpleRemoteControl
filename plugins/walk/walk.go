@@ -1,6 +1,4 @@
-// #!/usr/bin/env yaegi
-
-package main
+package walk
 
 import (
 	"fmt"
@@ -8,7 +6,11 @@ import (
 	"path/filepath"
 )
 
-func main() {
+func init() {
+	fmt.Println("Walk 插件已加载")
+}
+
+func Run() {
 	root := "../" // 你可以将这里替换为你要遍历的目录路径
 
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {

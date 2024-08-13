@@ -3,17 +3,23 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"time"
 
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/xxnuo/simpleRemoteControl/internal/log"
 	"github.com/xxnuo/simpleRemoteControl/internal/v"
 )
 
 func initCfg() {
 
 	// 日志初始化
-	v.Logger = log.New(v.Cfg.IsJsonLog)
+	consoleWriter := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.DateTime})
+	if v.Cfg.IsJsonLog {
+		consoleWriter = zerolog.New(os.Stderr)
+	}
+	v.Logger = consoleWriter.With().Timestamp().Logger()
+
 	v.Logger.Info().Msg("Starting app")
 	v.Logger.Info().Msgf("Config: %v", v.Cfg)
 
@@ -33,6 +39,9 @@ func initCfg() {
 		v.Cfg.File = filepath.Join(v.Cfg.WorkDir, "rc.yaml")
 		viper.SetConfigFile(v.Cfg.File)
 	}
+
+	v.Cfg.PluginsDir = filepath.Join(v.Cfg.WorkDir, "plugins")
+
 	v.Logger.Info().Msgf("Loading working directory: %s", v.Cfg.WorkDir)
 	v.Logger.Info().Msgf("Loading config file: %s", v.Cfg.File)
 

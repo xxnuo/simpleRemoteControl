@@ -4,13 +4,14 @@ package plugin
 
 import (
 	"runtime"
-
-	"github.com/rs/zerolog/log"
 )
 
 func Init() {
-	println("Init from ext1" + " running on " + runtime.GOOS)
-	log.Info("hi")
+	print("Init from ext1" + " running on " + runtime.GOOS + runtime.GOARCH)
 }
-func Main() { println("Main from ext1") }
-func End()  { println("End from ext1") }
+func Main() {
+	print("Main from ext1")
+}
+func End() {
+	print("End from ext1")
+}
