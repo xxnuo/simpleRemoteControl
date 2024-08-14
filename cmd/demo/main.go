@@ -53,13 +53,10 @@ func main() {
 		panic(err)
 	}
 
-	v, err := i.Eval("plugin.Init")
+	v, err := i.Eval("plugin1.Init")
 	if err != nil {
 		panic(err)
 	}
 
-	Init := v.Interface().(func())
-	Init()
-	// r := Init()
-	// println(r)
+	v.Call(nil)
 }

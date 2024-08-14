@@ -22,10 +22,16 @@ type CobraConfig struct {
 
 // 全局变量
 var (
-	Cfg          CobraConfig    // 命令行参数
-	Logger       zerolog.Logger // 日志对象
-	ApiServer    *fiber.App     // API 服务器对象
-	PluginEngine engine.Engine  // 插件引擎对象
+	Cfg    CobraConfig    // 命令行参数
+	Logger zerolog.Logger // 日志对象
+
+	PluginEngine  engine.Engine         // 插件引擎对象
+	PluginHandles []engine.PluginHandle // 插件处理函数集合
+
+	ApiServer     *fiber.App   // API 服务器对象
+	RootRouter    fiber.Router // 根路由对象
+	PluginsRouter fiber.Router // 插件路由对象
+
 )
 
 // CheckErr prints the msg with the prefix 'Error:' and exits with error code 1. If the msg is nil, it does nothing.

@@ -21,7 +21,7 @@ func initCfg() {
 	v.Logger = consoleWriter.With().Timestamp().Logger()
 
 	v.Logger.Info().Msg("Starting app")
-	v.Logger.Info().Msgf("Config: %v", v.Cfg)
+	// v.Logger.Info().Msgf("Config: %v", v.Cfg)
 
 	if v.Cfg.IsDebug {
 		_cd, err := os.Getwd()
