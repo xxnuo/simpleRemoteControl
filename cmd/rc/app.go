@@ -50,8 +50,11 @@ func InitRouter(a *fiber.App) fiber.Router {
 }
 
 func ReloadPlugins() {
-	v.PluginEngine = engine.New(v.Cfg.PluginsDir, v.Logger)
-	v.PluginHandles = v.PluginEngine.LoadAll(v.Cfg.PluginsDir)
+	newEngine := engine.New(v.Cfg.PluginsDir, v.Logger)
+	newHandles := v.PluginEngine.LoadAll(v.Cfg.PluginsDir)
+
+	v.PluginEngine = newEngine
+	v.PluginHandles = newHandles
 }
 
 func ReloadPluginsRouter(c *fiber.Ctx) error {
@@ -70,7 +73,7 @@ func ReloadPluginsRouter(c *fiber.Ctx) error {
 
 func RegisterPlugin(pluginsRouter fiber.Router, e engine.PluginHandle) {
 	pluginsRouter.Post("/"+e.PackageName, func(c *fiber.Ctx) error {
-		msg, err := e.Run(c.Body())
+		msg, err := e.Run(string(c.Body()))
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(msg)
 		}

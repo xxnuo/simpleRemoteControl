@@ -19,7 +19,7 @@ type Engine struct {
 
 type PluginHandle struct {
 	PackageName string
-	Run         func([]byte) (msg []byte, err error)
+	Run         func(string) (msg string, err error)
 }
 
 // 创建 Engine 实例
@@ -83,7 +83,7 @@ func (e *Engine) Load(dirPath string) PluginHandle {
 
 	pluginHandle := PluginHandle{
 		PackageName: dirName,
-		Run:         v.Interface().(func([]byte) (msg []byte, err error)),
+		Run:         v.Interface().(func(string) (msg string, err error)),
 	}
 	return pluginHandle
 }

@@ -6,21 +6,21 @@ import (
 	"fmt"
 )
 
-func Run(jsonData []byte) (msg []byte, err error) {
+func Run(jsonData string) (msg string, err error) {
 	type helloData struct {
 		Name string `json:"name"`
 	}
 	var data helloData
 
-	err = json.Unmarshal(jsonData, &data)
+	err = json.Unmarshal([]byte(jsonData), &data)
 	if err != nil {
-		return nil, err
+		return jsonData, err
 	}
 
 	if data.Name == "" {
-		return nil, errors.New("name is required")
+		return jsonData, errors.New("name is required")
 	}
 
 	fmt.Printf("Hello, %s!", data.Name)
-	return []byte("Got it!"), nil
+	return "Hi, Dear " + data.Name + "!", nil
 }
