@@ -16,7 +16,7 @@ func App() {
 
 	// 加载插件
 	v.Logger.Info().Msg("Loading plugins...")
-	ReloadPlugins()
+	LoadPlugins()
 
 	// API 服务器初始化
 	v.ApiServer = fiber.New()
@@ -27,16 +27,25 @@ func App() {
 
 	v.ApiServer.Use(cors.New())
 	v.RootRouter = InitRouter(v.ApiServer)
-	v.PluginsRouter = RegisterPlugins(v.RootRouter, v.PluginHandles)
+	v.PluginsRouter = RegisterPluginsRouter(v.RootRouter, v.PluginHandles)
 
 	// 启动 API 服务器
-	PrintRoutes(v.ApiServer)
+	// PrintRoutes(v.ApiServer)
 
 	if err := v.ApiServer.Listen(fmt.Sprintf("%s:%d", v.Cfg.Addr, v.Cfg.Port)); err != nil {
 		v.Logger.Fatal().Err(err).Msg("Fiber app error")
 	}
 }
 
+// 读取 plugins 目录下所有插件并加载
+func LoadPlugins() {
+	v.Logger.Info().Msg("Reloading plugins...")
+
+	v.PluginEngine = engine.New(v.Cfg.PluginsDir, v.Logger)
+	v.PluginHandles = v.PluginEngine.LoadAll(v.Cfg.PluginsDir)
+}
+
+// 初始化路由
 func InitRouter(a *fiber.App) fiber.Router {
 	root := a.Group("/api/v1")
 	root.Get("/", v1.Hello)
@@ -49,39 +58,8 @@ func InitRouter(a *fiber.App) fiber.Router {
 	return root
 }
 
-func ReloadPlugins() {
-	newEngine := engine.New(v.Cfg.PluginsDir, v.Logger)
-	newHandles := v.PluginEngine.LoadAll(v.Cfg.PluginsDir)
-
-	v.PluginEngine = newEngine
-	v.PluginHandles = newHandles
-}
-
-func ReloadPluginsRouter(c *fiber.Ctx) error {
-	ReloadPlugins()
-
-	v.RootRouter.Delete("/plugins", func(c *fiber.Ctx) error {
-		v.RootRouter.Delete("/plugins")
-		v.PluginsRouter = RegisterPlugins(v.RootRouter, v.PluginHandles)
-		return c.SendString("Plugins reloaded")
-	})
-	// v.PluginsRouter = RegisterPlugins(v.RootRouter, v.PluginHandles)
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Plugins reloaded",
-	})
-}
-
-func RegisterPlugin(pluginsRouter fiber.Router, e engine.PluginHandle) {
-	pluginsRouter.Post("/"+e.PackageName, func(c *fiber.Ctx) error {
-		msg, err := e.Run(string(c.Body()))
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(msg)
-		}
-		return c.Status(fiber.StatusOK).JSON(msg)
-	})
-}
-
-func RegisterPlugins(rootRouter fiber.Router, hs []engine.PluginHandle) fiber.Router {
+// 初次注册所有插件路由
+func RegisterPluginsRouter(rootRouter fiber.Router, hs []engine.PluginHandle) fiber.Router {
 	getPackageNames := func(hs []engine.PluginHandle) []string {
 		names := make([]string, len(hs))
 		for i, h := range hs {
@@ -95,11 +73,31 @@ func RegisterPlugins(rootRouter fiber.Router, hs []engine.PluginHandle) fiber.Ro
 		return c.Status(fiber.StatusOK).JSON(getPackageNames(hs))
 	})
 	for _, h := range hs {
-		RegisterPlugin(plugins, h)
+		RegisterPluginRouter(plugins, h)
 	}
 	return plugins
 }
 
+// 注册单个插件路由
+func RegisterPluginRouter(pluginsRouter fiber.Router, e engine.PluginHandle) {
+	pluginsRouter.Post("/"+e.PackageName, func(c *fiber.Ctx) error {
+		msg, err := e.Run(string(c.Body()))
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(msg)
+		}
+		return c.Status(fiber.StatusOK).JSON(msg)
+	})
+}
+
+// 重新加载插件及插件的路由
+func ReloadPluginsRouter(c *fiber.Ctx) error {
+	LoadPlugins()
+
+	v.PluginsRouter = RegisterPluginsRouter(v.RootRouter, v.PluginHandles)
+	return c.SendString("Plugins reloaded")
+}
+
+// 打印所有路由信息
 func PrintRoutes(a *fiber.App) {
 	routes := a.GetRoutes()
 	v.Logger.Debug().Msg("Routes:")

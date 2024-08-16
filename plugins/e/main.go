@@ -1,4 +1,4 @@
-package errtest
+package e
 
 import (
 	"errors"

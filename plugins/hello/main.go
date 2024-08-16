@@ -21,6 +21,6 @@ func Run(jsonData string) (msg string, err error) {
 		return jsonData, errors.New("name is required")
 	}
 
-	fmt.Printf("Hello, %s!", data.Name)
-	return "Hi, Dear " + data.Name + "!", nil
+	fmt.Printf("Hello, Dear1 %s!", data.Name)
+	return "Hi, Dear1 " + data.Name + "!", nil
 }
